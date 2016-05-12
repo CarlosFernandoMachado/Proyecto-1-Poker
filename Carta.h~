@@ -1,0 +1,16 @@
+#pragma once
+#include <string>
+
+using std::string;
+
+class Carta{
+	string color;
+	string figura;
+	char valor;
+public:
+	Carta(string,string,char);
+	~Carta();
+	string getColor();
+	char getValor();
+	string toString();
+};

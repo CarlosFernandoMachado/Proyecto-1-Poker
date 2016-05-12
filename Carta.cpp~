@@ -1,0 +1,15 @@
+#include "Carta.h"
+#include <string>
+#include <iostream>
+Carta::Carta(string color,string figura,char valor):color(color),figura(figura),valor(valor){}
+Carta::~Carta(){
+}
+string Carta::getColor(){
+	return color;
+}
+char getValor(){
+	return valor;
+}
+string Carta::toString(){
+	return figura;
+}
