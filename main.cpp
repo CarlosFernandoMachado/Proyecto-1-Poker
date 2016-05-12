@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <ncurses.h>
+#include "Carta.h"
 
 using std::string;
 using std::ifstream;
