@@ -1,8 +1,8 @@
-test: test.o Carta.o
-	g++ test.o Carta.o -o a 
+main: main.o Carta.o
+	g++ main.o Carta.o -o a 
 	
-test.o:	test.cpp Carta.h
-	g++ -c test.cpp 
+main.o:	main.cpp Carta.h
+	g++ -c main.cpp 
 
 Carta.o: Carta.h Carta.cpp
 	g++ -c Carta.cpp

@@ -3,14 +3,696 @@
 #include <fstream>
 #include <stdlib.h>
 #include <ncurses.h>
+#include "Carta.h"
 
 using std::string;
 using std::ifstream;
 using std::ofstream;
 
+Carta* crearmazo();
+void imprimircartas(Carta*,int*,bool);
+void imprimircombos();
+int juego(Carta*,int*,int);
+
+
 int main(int argc, char*argv[]){
 	initscr();
-	
+	int dinero = 100;
+	Carta* deck = crearmazo();
+	int* mantener = new int[5];
+	for(int i = 0; i < 5; i++)
+		mantener[i] = -1;
+	for(int i = 0; i < 10; i++){
+		imprimircombos();
+		imprimircartas(deck,mantener,true);
+		getch();
+		addstr("Ganancias: ");
+		printw("%d\n",juego(deck,mantener,dinero) - dinero);
+		dinero = juego(deck,mantener,dinero);
+		refresh();
+		getch();
+		clear();
+	}
+	delete[] deck;
+	delete[] mantener;
 	endwin();
 	return 0;
+}
+int juego(Carta* deck, int* mantener, int dinero){
+	string valor1 = deck[mantener[0]].getValor(), valor2 = deck[mantener[1]].getValor(), valor3 = deck[mantener[2]].getValor(), valor4 = deck[mantener[3]].getValor(), valor5 = deck[mantener[4]].getValor(), palo1 = deck[mantener[0]].getFigura(), palo2 = deck[mantener[1]].getFigura(), palo3 = deck[mantener[2]].getFigura(), palo4 = deck[mantener[3]].getFigura(), palo5 = deck[mantener[4]].getFigura(), color1 = deck[mantener[0]].getColor(), color2 = deck[mantener[1]].getColor(), color3 = deck[mantener[2]].getColor(), color4 = deck[mantener[3]].getColor(), color5 = deck[mantener[4]].getColor();
+	string valores[] = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"};
+	//PAR JACKS--------------------------------------------------------------------------------
+	for(int i = 10; i < 13; i++){
+		int cont = 0;
+		if(valor1 == valores[i])
+			cont++;
+		if(valor2 == valores[i])
+			cont++;
+		if(valor3 == valores[i])
+			cont++;
+		if(valor4 == valores[i])
+			cont++;
+		if(valor5 == valores[i])
+			cont++;
+		if(cont >= 3){
+			dinero *= 1;
+			break;
+		}
+	}
+	//DOS PARES, FULL HOUSE, TRIO-------------------------------------------------------------
+	int contpar1 = 0, contpar2 = 0;	
+	for(int i = 0; i < 13; i++){
+		if(contpar1 == 0){
+			if(valor1 == valores[i])
+				contpar1++;
+			if(valor2 == valores[i])
+				contpar1++;
+			if(valor3 == valores[i])
+				contpar1++;
+			if(valor4 == valores[i])
+				contpar1++;
+			if(valor5 == valores[i])
+				contpar1++;
+			if(contpar1 < 2)
+				contpar1 = 0;
+		}else if(contpar1 >= 2){
+			contpar2 = 0;
+			if(valor1 == valores[i])
+				contpar2++;
+			if(valor2 == valores[i])
+				contpar2++;
+			if(valor3 == valores[i])
+				contpar2++;
+			if(valor4 == valores[i])
+				contpar2++;
+			if(valor5 == valores[i])
+				contpar2++;
+			if(contpar1 == 4 || contpar2 == 4){
+				dinero *= 25;
+				break;			
+			}else if((contpar1 == 3 && contpar2 == 2) || (contpar2 == 3 && contpar1 == 2)){
+				dinero *= 9;//full house
+				break;			
+			}else if(contpar2 == 3 || contpar1 == 3){
+				dinero *= 3;//trio
+				break;
+			}else if(contpar1 == 2 && contpar2 == 2){
+				dinero *= 2;//dos pares
+				break;
+			}
+		}
+	}
+	//escalera--------------------------------------------------------------------------------
+	for(int i = 0; i < 10; i++){
+		if(valor1 == valores[i] || valor2 == valores[i] || valor3 == valores[i] || valor4 == valores[i] || valor5 == valores[i]){
+			if(valor1 == valores[i+1] || valor2 == valores[i+1] || valor3 == valores[i+1] || valor4 == valores[i+1] || valor5 == valores[i+1]){
+				if(valor1 == valores[i+2] || valor2 == valores[i+2] || valor3 == valores[i+2] || valor4 == valores[i+2] || valor5 == valores[i+2]){
+					if(valor1 == valores[i+3] || valor2 == valores[i+3] || valor3 == valores[i+3] || valor4 == valores[i+3] || valor5 == valores[i+3]){
+						if(valor1 == valores[i+4] || valor2 == valores[i+4] || valor3 == valores[i+4] || valor4 == valores[i+4] || valor5 == valores[i+4]){
+							dinero *= 4;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+	//MISMO MANJAR------------------------------------------------------------------------------
+	if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
+		dinero *= 5;
+	}
+	//ESCALERA + MANJAR-----------------------------------------------------------------------
+	for(int i = 0; i < 9; i++){
+		if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
+			if(valor1 == valores[i] || valor2 == valores[i] || valor3 == valores[i] || valor4 == valores[i] || valor5 == valores[i]){
+				if(valor1 == valores[i+1] || valor2 == valores[i+1] || valor3 == valores[i+1] || valor4 == valores[i+1] || valor5 == valores[i+1]){
+					if(valor1 == valores[i+2] || valor2 == valores[i+2] || valor3 == valores[i+2] || valor4 == valores[i+2] || valor5 == valores[i+2]){
+						if(valor1 == valores[i+3] || valor2 == valores[i+3] || valor3 == valores[i+3] || valor4 == valores[i+3] || valor5 == valores[i+3]){
+							if(valor1 == valores[i+4] || valor2 == valores[i+4] || valor3 == valores[i+4] || valor4 == valores[i+4] || valor5 == valores[i+4]){
+								dinero *= 50;
+								break;
+							}
+						}
+					}
+				}	
+			}
+		}		
+	}
+	//escalera real
+	if((palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5) && (color1 == color2 && color2 == color3 && color3 == color4 && color4 == color5)){
+		if((valor1 == "A" || valor2 == "A" || valor3 == "A" || valor4 == "A" || valor5 == "A") && (valor1 == "10" || valor2 == "10" || valor3 == "10" || valor4 == "10" || valor5 == "10") && (valor1 == "J" || valor2 == "J" || valor3 == "J" || valor4 == "J" || valor5 == "J") && (valor1 == "Q" || valor2 == "Q" || valor3 == "Q" || valor4 == "Q" || valor5 == "Q") && (valor1 == "K" || valor2 == "K" || valor3 == "K" || valor4 == "K" || valor5 == "K")){
+			dinero *= 250;
+		}
+	}
+	return dinero;
+}
+void imprimircombos(){
+	addstr("Par Jack o mejor *1\nDos Pares *2\nTrio *3\nEscalera *4\nMismo Manjar *5\nFull House *9\nCuatro Iguales *25\nEscalera + Manjar *50\nEscalera Real *250\n");
+}
+Carta* crearmazo(){
+	Carta* deck = new Carta[52];
+	string valores[] = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"};
+	string color = "negro";
+	string palo = "♠";
+	int cont = 0;
+	for(int i = 0; i <= 51; i++){
+		if(i == 26){
+			color = "rojo";
+		}
+		if(i == 13){
+			palo = "♣";
+		}
+		if(i == 26){
+			palo = "♥";
+		}		
+		if(i == 39){
+			palo = "♦";
+		}		
+		if(cont == 13){
+			cont = 0;
+		}		
+		Carta temp(color,palo,valores[cont]);
+		deck[i] = temp;
+		cont++;
+	}
+	return deck;
+}
+void imprimircartas(Carta* deck, int* mantener, bool primeravez){
+	string carta1, carta2, carta3, carta4, carta5, palo1, palo2, palo3, palo4, palo5, color1, color2, color3, color4, color5;
+	int random = 0;
+	srand(time(NULL));
+	if(primeravez){
+		random = rand() % 52;
+		mantener[0] = random;
+		carta1 = deck[random].getValor();
+		palo1 = deck[random].getFigura();
+		color1 = deck[random].getColor();
+		do{
+			random = rand() % 52;
+			mantener[1] = random;
+			carta2 = deck[random].getValor();
+			palo2 = deck[random].getFigura();
+			color2 = deck[random].getColor();
+		}while(random == mantener[0]);
+		do{
+			random = rand() % 52;
+			mantener[2] = random;
+			carta3 = deck[random].getValor();
+			palo3 = deck[random].getFigura();
+			color3 = deck[random].getColor();
+		}while(random == mantener[0] || random == mantener[1]);
+		do{
+			random = rand() % 52;
+			mantener[3] = random;
+			carta4 = deck[random].getValor();
+			palo4 = deck[random].getFigura();
+			color4 = deck[random].getColor();
+		}while(random == mantener[0] || random == mantener[1] || random == mantener[2]);
+		do{
+			random = rand() % 52;
+			mantener[4] = random;
+			carta5 = deck[random].getValor();
+			palo5 = deck[random].getFigura();
+			color5 = deck[random].getColor();
+		}while(random == mantener[0] || random == mantener[1] || random == mantener[2] || random == mantener[3]);
+	}else{
+		if(mantener[0] == -1){
+			do{
+				random = rand() % 52;
+				mantener[0] = random;
+				carta1 = deck[random].getValor();
+				palo1 = deck[random].getFigura();
+				color1 = deck[random].getColor();
+			}while(random == mantener[1] || random == mantener[2] || random == mantener[3] || random == mantener[4]);
+		}
+		if(mantener[1] == -1){
+			do{
+				random = rand() % 52;
+				mantener[1] = random;
+				carta2 = deck[random].getValor();
+				palo2 = deck[random].getFigura();
+				color2 = deck[random].getColor();
+			}while(random == mantener[0] || random == mantener[2] || random == mantener[3] || random == mantener[4]);
+		}
+		if(mantener[2] == -1){
+			do{
+				random = rand() % 52;
+				mantener[2] = random;
+				carta3 = deck[random].getValor();
+				palo3 = deck[random].getFigura();
+				color3 = deck[random].getColor();
+			}while(random == mantener[0] || random == mantener[1] || random == mantener[3] || random == mantener[4]);
+		}
+		if(mantener[3] == -1){
+			do{
+				random = rand() % 52;
+				mantener[3] = random;
+				carta4 = deck[random].getValor();
+				palo4 = deck[random].getFigura();
+				color4 = deck[random].getColor();
+			}while(random == mantener[0] || random == mantener[2] || random == mantener[1] || random == mantener[4]);
+		}
+		if(mantener[4] == -1){
+			do{
+				random = rand() % 52;
+				mantener[4] = random;
+				carta5 = deck[random].getValor();
+				palo5 = deck[random].getFigura();
+				color5 = deck[random].getColor();
+			}while(random == mantener[0] || random == mantener[2] || random == mantener[3] || random == mantener[1]);
+		}
+	}	
+	//color1
+	addstr("***************  ");	
+	//color2
+	addstr("***************  ");	
+	//color3
+	addstr("***************  ");	
+	//color4
+	addstr("*************** ");	
+	//color5
+	addstr("***************\n");	
+	//color1
+	addstr("*");
+	if(carta1 == "A"){
+		addstr("A");
+	}else if(carta1 == "2"){
+		addstr("2");
+	}else if(carta1 == "3"){
+		addstr("3");
+	}else if(carta1 == "4"){
+		addstr("4");
+	}else if(carta1 == "5"){
+		addstr("5");
+	}else if(carta1 == "6"){
+		addstr("6");
+	}else if(carta1 == "7"){
+		addstr("7");
+	}else if(carta1 == "8"){
+		addstr("8");
+	}else if(carta1 == "9"){
+		addstr("9");
+	}else if(carta1 == "10"){
+		addstr("10");
+	}else if(carta1 == "J"){
+		addstr("J");
+	}else if(carta1 == "Q"){
+		addstr("Q");
+	}else if(carta1 == "K"){
+		addstr("K");
+	}
+	if(carta1 != "10")
+		addstr("            *");
+	else
+		addstr("           *");	
+	//color2
+	addstr("  *");
+	if(carta2 == "A"){
+		addstr("A");
+	}else if(carta2 == "2"){
+		addstr("2");
+	}else if(carta2 == "3"){
+		addstr("3");
+	}else if(carta2 == "4"){
+		addstr("4");
+	}else if(carta2 == "5"){
+		addstr("5");
+	}else if(carta2 == "6"){
+		addstr("6");
+	}else if(carta2 == "7"){
+		addstr("7");
+	}else if(carta2 == "8"){
+		addstr("8");
+	}else if(carta2 == "9"){
+		addstr("9");
+	}else if(carta2 == "10"){
+		addstr("10");
+	}else if(carta2 == "J"){
+		addstr("J");
+	}else if(carta2 == "Q"){
+		addstr("Q");
+	}else if(carta2 == "K"){
+		addstr("K");
+	}
+	if(carta2 != "10")
+		addstr("            *");
+	else
+		addstr("           *");	
+	//color3
+	addstr("  *");
+	if(carta3 == "A"){
+		addstr("A");
+	}else if(carta3 == "2"){
+		addstr("2");
+	}else if(carta3 == "3"){
+		addstr("3");
+	}else if(carta3 == "4"){
+		addstr("4");
+	}else if(carta3 == "5"){
+		addstr("5");
+	}else if(carta3 == "6"){
+		addstr("6");
+	}else if(carta3 == "7"){
+		addstr("7");
+	}else if(carta3 == "8"){
+		addstr("8");
+	}else if(carta3 == "9"){
+		addstr("9");
+	}else if(carta3 == "10"){
+		addstr("10");
+	}else if(carta3 == "J"){
+		addstr("J");
+	}else if(carta3 == "Q"){
+		addstr("Q");
+	}else if(carta3 == "K"){
+		addstr("K");
+	}
+	if(carta3 != "10")
+		addstr("            *");
+	else
+		addstr("           *");		
+	//color4
+	addstr("  *");
+	if(carta4 == "A"){
+		addstr("A");
+	}else if(carta4 == "2"){
+		addstr("2");
+	}else if(carta4 == "3"){
+		addstr("3");
+	}else if(carta4 == "4"){
+		addstr("4");
+	}else if(carta4 == "5"){
+		addstr("5");
+	}else if(carta4 == "6"){
+		addstr("6");
+	}else if(carta4 == "7"){
+		addstr("7");
+	}else if(carta4 == "8"){
+		addstr("8");
+	}else if(carta4 == "9"){
+		addstr("9");
+	}else if(carta4 == "10"){
+		addstr("10");
+	}else if(carta4 == "J"){
+		addstr("J");
+	}else if(carta4 == "Q"){
+		addstr("Q");
+	}else if(carta4 == "K"){
+		addstr("K");
+	}
+	if(carta4 != "10")
+		addstr("            *");
+	else
+		addstr("           *");		
+	//color5
+	addstr(" *");
+	if(carta5 == "A"){
+		addstr("A");
+	}else if(carta5 == "2"){
+		addstr("2");
+	}else if(carta5 == "3"){
+		addstr("3");
+	}else if(carta5 == "4"){
+		addstr("4");
+	}else if(carta5 == "5"){
+		addstr("5");
+	}else if(carta5 == "6"){
+		addstr("6");
+	}else if(carta5 == "7"){
+		addstr("7");
+	}else if(carta5 == "8"){
+		addstr("8");
+	}else if(carta5 == "9"){
+		addstr("9");
+	}else if(carta5 == "10"){
+		addstr("10");
+	}else if(carta5 == "J"){
+		addstr("J");
+	}else if(carta5 == "Q"){
+		addstr("Q");
+	}else if(carta5 == "K"){
+		addstr("K");
+	}
+	if(carta5 != "10")
+		addstr("            *\n");
+	else
+		addstr("           *\n");		
+	//color1
+	addstr("*             *");	
+	//color2
+	addstr("  *             *");	
+	//color3
+	addstr("  *             *");	
+	//color4
+	addstr("  *             *");	
+	//color5
+	addstr(" *             *\n");	
+	//color1
+	addstr("*      ");
+	if(palo1 == "♦"){
+		addstr("♦");
+	}else if(palo1 == "♥"){
+		addstr("♥");
+	}else if(palo1 == "♣"){
+		addstr("♣");
+	}else if(palo1 == "♠"){
+		addstr("♠");	
+	}
+	addstr("      *");	
+	//color2
+	addstr("  *      ");
+	if(palo2 == "♦"){
+		addstr("♦");
+	}else if(palo2 == "♥"){
+		addstr("♥");
+	}else if(palo2 == "♣"){
+		addstr("♣");
+	}else if(palo2 == "♠"){
+		addstr("♠");	
+	}
+	addstr("      *");	
+	//color3
+	addstr("  *      ");
+	if(palo3 == "♦"){
+		addstr("♦");
+	}else if(palo3 == "♥"){
+		addstr("♥");
+	}else if(palo3 == "♣"){
+		addstr("♣");
+	}else if(palo3 == "♠"){
+		addstr("♠");	
+	}
+	addstr("      *");	
+	//color4
+	addstr("  *      ");
+	if(palo4 == "♦"){
+		addstr("♦");
+	}else if(palo4 == "♥"){
+		addstr("♥");
+	}else if(palo4 == "♣"){
+		addstr("♣");
+	}else if(palo4 == "♠"){
+		addstr("♠");	
+	}
+	addstr("      *");	
+	//color5
+	addstr(" *      ");
+	if(palo5 == "♦"){
+		addstr("♦");
+	}else if(palo5 == "♥"){
+		addstr("♥");
+	}else if(palo5 == "♣"){
+		addstr("♣");
+	}else if(palo5 == "♠"){
+		addstr("♠");	
+	}
+	addstr("      *\n");	
+	//color1
+	addstr("*             *  ");	
+	//color2
+	addstr("*             *  ");	
+	//color3
+	addstr("*             *  ");	
+	//color4
+	addstr("*             * ");	
+	//color5
+	addstr("*             *\n");	
+	//color1
+	if(carta1 != "10")
+		addstr("*            ");
+	else
+		addstr("*           ");
+	if(carta1 == "A"){
+		addstr("A");
+	}else if(carta1 == "2"){
+		addstr("2");
+	}else if(carta1 == "3"){
+		addstr("3");
+	}else if(carta1 == "4"){
+		addstr("4");
+	}else if(carta1 == "5"){
+		addstr("5");
+	}else if(carta1 == "6"){
+		addstr("6");
+	}else if(carta1 == "7"){
+		addstr("7");
+	}else if(carta1 == "8"){
+		addstr("8");
+	}else if(carta1 == "9"){
+		addstr("9");
+	}else if(carta1 == "10"){
+		addstr("10");
+	}else if(carta1 == "J"){
+		addstr("J");
+	}else if(carta1 == "Q"){
+		addstr("Q");
+	}else if(carta1 == "K"){
+		addstr("K");
+	}
+	addstr("*  ");	
+	//color2
+	if(carta2 != "10")
+		addstr("*            ");
+	else
+		addstr("*           ");
+	if(carta2 == "A"){
+		addstr("A");
+	}else if(carta2 == "2"){
+		addstr("2");
+	}else if(carta2 == "3"){
+		addstr("3");
+	}else if(carta2 == "4"){
+		addstr("4");
+	}else if(carta2 == "5"){
+		addstr("5");
+	}else if(carta2 == "6"){
+		addstr("6");
+	}else if(carta2 == "7"){
+		addstr("7");
+	}else if(carta2 == "8"){
+		addstr("8");
+	}else if(carta2 == "9"){
+		addstr("9");
+	}else if(carta2 == "10"){
+		addstr("10");
+	}else if(carta2 == "J"){
+		addstr("J");
+	}else if(carta2 == "Q"){
+		addstr("Q");
+	}else if(carta2 == "K"){
+		addstr("K");
+	}
+	addstr("*  ");	
+	//color3
+	if(carta3 != "10")
+		addstr("*            ");
+	else
+		addstr("*           ");
+	if(carta3 == "A"){
+		addstr("A");
+	}else if(carta3 == "2"){
+		addstr("2");
+	}else if(carta3 == "3"){
+		addstr("3");
+	}else if(carta3 == "4"){
+		addstr("4");
+	}else if(carta3 == "5"){
+		addstr("5");
+	}else if(carta3 == "6"){
+		addstr("6");
+	}else if(carta3 == "7"){
+		addstr("7");
+	}else if(carta3 == "8"){
+		addstr("8");
+	}else if(carta3 == "9"){
+		addstr("9");
+	}else if(carta3 == "10"){
+		addstr("10");
+	}else if(carta3 == "J"){
+		addstr("J");
+	}else if(carta3 == "Q"){
+		addstr("Q");
+	}else if(carta3 == "K"){
+		addstr("K");
+	}
+	addstr("*  ");	
+	//color4
+	if(carta4 != "10")
+		addstr("*            ");
+	else
+		addstr("*           ");
+	if(carta4 == "A"){
+		addstr("A");
+	}else if(carta4 == "2"){
+		addstr("2");
+	}else if(carta4 == "3"){
+		addstr("3");
+	}else if(carta4 == "4"){
+		addstr("4");
+	}else if(carta4 == "5"){
+		addstr("5");
+	}else if(carta4 == "6"){
+		addstr("6");
+	}else if(carta4 == "7"){
+		addstr("7");
+	}else if(carta4 == "8"){
+		addstr("8");
+	}else if(carta4 == "9"){
+		addstr("9");
+	}else if(carta4 == "10"){
+		addstr("10");
+	}else if(carta4 == "J"){
+		addstr("J");
+	}else if(carta4 == "Q"){
+		addstr("Q");
+	}else if(carta4 == "K"){
+		addstr("K");
+	}
+	addstr("* ");	
+	//color5
+	if(carta5 != "10")
+		addstr("*            ");
+	else
+		addstr("*           ");
+	if(carta5 == "A"){
+		addstr("A");
+	}else if(carta5 == "2"){
+		addstr("2");
+	}else if(carta5 == "3"){
+		addstr("3");
+	}else if(carta5 == "4"){
+		addstr("4");
+	}else if(carta5 == "5"){
+		addstr("5");
+	}else if(carta5 == "6"){
+		addstr("6");
+	}else if(carta5 == "7"){
+		addstr("7");
+	}else if(carta5 == "8"){
+		addstr("8");
+	}else if(carta5 == "9"){
+		addstr("9");
+	}else if(carta5 == "10"){
+		addstr("10");
+	}else if(carta5 == "J"){
+		addstr("J");
+	}else if(carta5 == "Q"){
+		addstr("Q");
+	}else if(carta5 == "K"){
+		addstr("K");
+	}
+	addstr("*\n");	
+	//color1
+	addstr("***************  ");	
+	//color2
+	addstr("***************  ");	
+	//color3
+	addstr("***************  ");	
+	//color4
+	addstr("*************** ");	
+	//color5
+	addstr("***************\n");
+	//blanco
+	refresh();
 }
