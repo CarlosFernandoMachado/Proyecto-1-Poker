@@ -10,33 +10,89 @@ using std::ifstream;
 using std::ofstream;
 
 Carta* crearmazo();
-void imprimircartas(Carta*,int*,bool);
+void imprimircartas(Carta*,int*&,bool);
 void imprimircombos();
 int juego(Carta*,int*,int);
-
+void imprimircartasvacias();
 
 int main(int argc, char*argv[]){
 	initscr();
-	int dinero = 100;
+	start_color();
+	int dinero = 0,apuesta = 0;
+	char retener;
+	addstr("Ingrese cuanto dinero quiere tener: ");
+	refresh();
+	scanw("%d",&dinero);
+	if(dinero <= 0){
+		addstr("No puede empezar con una cuenta negativa o vacia\nSe le han acreditado $100 a su cuenta\n");
+		dinero = 100;
+	}
 	Carta* deck = crearmazo();
 	int* mantener = new int[5];
 	for(int i = 0; i < 5; i++)
 		mantener[i] = -1;
-	for(int i = 0; i < 3; i++){
-		imprimircombos();
-		imprimircartas(deck,mantener,true);
-		getch();
-		addstr("Ganancias: ");
-		printw("%d\n",juego(deck,mantener,dinero) - dinero);
-		dinero = juego(deck,mantener,dinero) - dinero;
+	imprimircombos();
+	imprimircartasvacias();
+	do{
+		if(apuesta <= 0 || apuesta > dinero){
+			addstr("Como recordatorio:\nTiene que apostar dinero y no puede apostar mas de lo que tiene\n");
+		}
+		addstr("Cuanto dinero desea apostar? ");
 		refresh();
-		getch();
-		clear();
-	}
+		scanw("%d",&apuesta);
+	}while(apuesta > dinero || apuesta <= 0);
+	dinero -= apuesta;
+	clear();
+	imprimircartas(deck,mantener,true);
+	addstr("Porfavor conteste las siguientes preguntas con s y n\ns = si, n = no\nEmpezando desde la izquierda\n");
+	addstr("Quiere mantener la carta 1: ");
+	retener = getch();
+	addstr("\n");
+	if(retener == 'n' || retener == 'N')
+		mantener[0] = -1;
+	addstr("Quiere mantener la carta 2: ");
+	retener = getch();
+	addstr("\n");
+	if(retener == 'n' || retener == 'N')
+		mantener[1] = -1;
+	addstr("Quiere mantener la carta 3: ");
+	retener = getch();
+	addstr("\n");
+	if(retener == 'n' || retener == 'N')
+		mantener[2] = -1;
+	addstr("Quiere mantener la carta 4: ");
+	retener = getch();
+	addstr("\n");
+	if(retener == 'n' || retener == 'N')
+		mantener[3] = -1;
+	addstr("Quiere mantener la carta 5: ");
+	retener = getch();
+	addstr("\n");
+	if(retener == 'n' || retener == 'N')
+		mantener[4] = -1;
+	clear();
+	imprimircartas(deck,mantener,false);
+	addstr("Ganancias: ");
+	refresh();
+	printw("%d\n",juego(deck,mantener,apuesta));
+	dinero += juego(deck,mantener,dinero);
+	refresh();
+	getch();
+	clear();
 	delete[] deck;
 	delete[] mantener;
 	endwin();
 	return 0;
+}
+void imprimircartasvacias(){
+	addstr("***************  ***************  ***************  *************** ***************\n");
+	addstr("*             *  *             *  *             *  *             * *             *\n");
+	addstr("*             *  *             *  *             *  *             * *             *\n");
+	addstr("*             *  *             *  *             *  *             * *             *\n");
+	addstr("*             *  *             *  *             *  *             * *             *\n");
+	addstr("*             *  *             *  *             *  *             * *             *\n");
+	addstr("***************  ***************  ***************  *************** ***************\n");
+	refresh();
 }
 int juego(Carta* deck, int* mantener, int dinero){
 	string valor1 = deck[mantener[0]].getValor(), valor2 = deck[mantener[1]].getValor(), valor3 = deck[mantener[2]].getValor(), valor4 = deck[mantener[3]].getValor(), valor5 = deck[mantener[4]].getValor(), palo1 = deck[mantener[0]].getFigura(), palo2 = deck[mantener[1]].getFigura(), palo3 = deck[mantener[2]].getFigura(), palo4 = deck[mantener[3]].getFigura(), palo5 = deck[mantener[4]].getFigura(), color1 = deck[mantener[0]].getColor(), color2 = deck[mantener[1]].getColor(), color3 = deck[mantener[2]].getColor(), color4 = deck[mantener[3]].getColor(), color5 = deck[mantener[4]].getColor();
@@ -149,6 +205,8 @@ int juego(Carta* deck, int* mantener, int dinero){
 }
 void imprimircombos(){
 	addstr("Par Jack o mejor *1\nDos Pares *2\nTrio *3\nEscalera *4\nMismo Manjar *5\nFull House *9\nCuatro Iguales *25\nEscalera + Manjar *50\nEscalera Real *250\n");
+	addstr("P == Pica\tT == Trebol\tD == Diamante\tC == Corazon\n");
+	refresh();
 }
 Carta* crearmazo(){
 	Carta* deck = new Carta[52];
@@ -178,7 +236,7 @@ Carta* crearmazo(){
 	}
 	return deck;
 }
-void imprimircartas(Carta* deck, int* mantener, bool primeravez){
+void imprimircartas(Carta* deck, int*& mantener, bool primeravez){
 	string carta1, carta2, carta3, carta4, carta5, palo1, palo2, palo3, palo4, palo5, color1, color2, color3, color4, color5;
 	int random = 0;
 	srand(time(NULL));
@@ -225,6 +283,10 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 				palo1 = deck[random].getFigura();
 				color1 = deck[random].getColor();
 			}while(random == mantener[1] || random == mantener[2] || random == mantener[3] || random == mantener[4]);
+		}else{
+			carta1 = deck[mantener[0]].getValor();
+			palo1 = deck[mantener[0]].getFigura();
+			color1 = deck[mantener[0]].getColor();
 		}
 		if(mantener[1] == -1){
 			do{
@@ -234,6 +296,10 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 				palo2 = deck[random].getFigura();
 				color2 = deck[random].getColor();
 			}while(random == mantener[0] || random == mantener[2] || random == mantener[3] || random == mantener[4]);
+		}else{
+			carta2 = deck[mantener[1]].getValor();
+			palo2 = deck[mantener[1]].getFigura();
+			color2 = deck[mantener[1]].getColor();
 		}
 		if(mantener[2] == -1){
 			do{
@@ -243,6 +309,10 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 				palo3 = deck[random].getFigura();
 				color3 = deck[random].getColor();
 			}while(random == mantener[0] || random == mantener[1] || random == mantener[3] || random == mantener[4]);
+		}else{
+			carta3 = deck[mantener[2]].getValor();
+			palo3 = deck[mantener[2]].getFigura();
+			color3 = deck[mantener[2]].getColor();
 		}
 		if(mantener[3] == -1){
 			do{
@@ -252,6 +322,10 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 				palo4 = deck[random].getFigura();
 				color4 = deck[random].getColor();
 			}while(random == mantener[0] || random == mantener[2] || random == mantener[1] || random == mantener[4]);
+		}else{
+			carta4 = deck[mantener[3]].getValor();
+			palo4 = deck[mantener[3]].getFigura();
+			color4 = deck[mantener[3]].getColor();
 		}
 		if(mantener[4] == -1){
 			do{
@@ -261,19 +335,55 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 				palo5 = deck[random].getFigura();
 				color5 = deck[random].getColor();
 			}while(random == mantener[0] || random == mantener[2] || random == mantener[3] || random == mantener[1]);
+		}else{
+			carta5 = deck[mantener[5]].getValor();
+			palo5 = deck[mantener[5]].getFigura();
+			color5 = deck[mantener[5]].getColor();
 		}
 	}	
+	init_pair(1,COLOR_RED,COLOR_WHITE);
+	init_pair(2,COLOR_BLACK,COLOR_WHITE);
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*************** ");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************\n");	
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*");
 	if(carta1 == "A"){
 		addstr("A");
@@ -307,6 +417,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	else
 		addstr("           *");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *");
 	if(carta2 == "A"){
 		addstr("A");
@@ -340,6 +455,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	else
 		addstr("           *");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *");
 	if(carta3 == "A"){
 		addstr("A");
@@ -373,6 +493,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	else
 		addstr("           *");		
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *");
 	if(carta4 == "A"){
 		addstr("A");
@@ -406,6 +531,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	else
 		addstr("           *");		
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr(" *");
 	if(carta5 == "A"){
 		addstr("A");
@@ -439,86 +569,166 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	else
 		addstr("           *\n");		
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             *");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *             *");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *             *");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *             *");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr(" *             *\n");	
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*      ");
 	if(palo1 == "♦"){
-		addstr("♦");
+		addstr("D");
 	}else if(palo1 == "♥"){
-		addstr("♥");
+		addstr("C");
 	}else if(palo1 == "♣"){
-		addstr("♣");
+		addstr("T");
 	}else if(palo1 == "♠"){
-		addstr("♠");	
+		addstr("P");	
 	}
 	addstr("      *");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *      ");
 	if(palo2 == "♦"){
-		addstr("♦");
+		addstr("D");
 	}else if(palo2 == "♥"){
-		addstr("♥");
+		addstr("C");
 	}else if(palo2 == "♣"){
-		addstr("♣");
+		addstr("T");
 	}else if(palo2 == "♠"){
-		addstr("♠");	
+		addstr("P");	
 	}
 	addstr("      *");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *      ");
 	if(palo3 == "♦"){
-		addstr("♦");
+		addstr("D");
 	}else if(palo3 == "♥"){
-		addstr("♥");
+		addstr("C");
 	}else if(palo3 == "♣"){
-		addstr("♣");
+		addstr("T");
 	}else if(palo3 == "♠"){
-		addstr("♠");	
+		addstr("P");	
 	}
 	addstr("      *");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("  *      ");
 	if(palo4 == "♦"){
-		addstr("♦");
+		addstr("D");
 	}else if(palo4 == "♥"){
-		addstr("♥");
+		addstr("C");
 	}else if(palo4 == "♣"){
-		addstr("♣");
+		addstr("T");
 	}else if(palo4 == "♠"){
-		addstr("♠");	
+		addstr("P");	
 	}
 	addstr("      *");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr(" *      ");
 	if(palo5 == "♦"){
-		addstr("♦");
+		addstr("D");
 	}else if(palo5 == "♥"){
-		addstr("♥");
+		addstr("C");
 	}else if(palo5 == "♣"){
-		addstr("♣");
+		addstr("T");
 	}else if(palo5 == "♠"){
-		addstr("♠");	
+		addstr("P");	
 	}
 	addstr("      *\n");	
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             *  ");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             *  ");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             *  ");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             * ");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*             *\n");	
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	if(carta1 != "10")
 		addstr("*            ");
 	else
@@ -552,6 +762,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	}
 	addstr("*  ");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	if(carta2 != "10")
 		addstr("*            ");
 	else
@@ -585,6 +800,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	}
 	addstr("*  ");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	if(carta3 != "10")
 		addstr("*            ");
 	else
@@ -618,6 +838,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	}
 	addstr("*  ");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	if(carta4 != "10")
 		addstr("*            ");
 	else
@@ -651,6 +876,11 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	}
 	addstr("* ");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	if(carta5 != "10")
 		addstr("*            ");
 	else
@@ -684,15 +914,45 @@ void imprimircartas(Carta* deck, int* mantener, bool primeravez){
 	}
 	addstr("*\n");	
 	//color1
+	if(color1 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color2
+	if(color2 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color3
+	if(color3 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************  ");	
 	//color4
+	if(color4 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("*************** ");	
 	//color5
+	if(color5 == "negro"){
+		attron(COLOR_PAIR(2));
+	}else{
+		attron(COLOR_PAIR(1));
+	}
 	addstr("***************\n");
 	//blanco
+	if(color5 == "negro"){
+		attroff(COLOR_PAIR(2));
+	}else{
+		attroff(COLOR_PAIR(1));
+	}
 	refresh();
 }
