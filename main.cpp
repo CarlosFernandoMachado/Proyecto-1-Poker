@@ -97,26 +97,46 @@ void imprimircartasvacias(){
 int juego(Carta* deck, int* mantener, int dinero){
 	string valor1 = deck[mantener[0]].getValor(), valor2 = deck[mantener[1]].getValor(), valor3 = deck[mantener[2]].getValor(), valor4 = deck[mantener[3]].getValor(), valor5 = deck[mantener[4]].getValor(), palo1 = deck[mantener[0]].getFigura(), palo2 = deck[mantener[1]].getFigura(), palo3 = deck[mantener[2]].getFigura(), palo4 = deck[mantener[3]].getFigura(), palo5 = deck[mantener[4]].getFigura(), color1 = deck[mantener[0]].getColor(), color2 = deck[mantener[1]].getColor(), color3 = deck[mantener[2]].getColor(), color4 = deck[mantener[3]].getColor(), color5 = deck[mantener[4]].getColor();
 	string valores[] = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"};
-	//PAR JACKS--------------------------------------------------------------------------------
-	for(int i = 10; i < 13; i++){
-		int cont = 0;
-		if(valor1 == valores[i])
-			cont++;
-		if(valor2 == valores[i])
-			cont++;
-		if(valor3 == valores[i])
-			cont++;
-		if(valor4 == valores[i])
-			cont++;
-		if(valor5 == valores[i])
-			cont++;
-		if(cont >= 3){
-			dinero *= 1;
-			break;
+	int contpar1 = 0, contpar2 = 0;
+	//escalera real
+	if((palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5) && (color1 == color2 && color2 == color3 && color3 == color4 && color4 == color5)){
+		if((valor1 == "A" || valor2 == "A" || valor3 == "A" || valor4 == "A" || valor5 == "A") && (valor1 == "10" || valor2 == "10" || valor3 == "10" || valor4 == "10" || valor5 == "10") && (valor1 == "J" || valor2 == "J" || valor3 == "J" || valor4 == "J" || valor5 == "J") && (valor1 == "Q" || valor2 == "Q" || valor3 == "Q" || valor4 == "Q" || valor5 == "Q") && (valor1 == "K" || valor2 == "K" || valor3 == "K" || valor4 == "K" || valor5 == "K")){
+			return (dinero*250);
 		}
 	}
-	//DOS PARES, FULL HOUSE, TRIO-------------------------------------------------------------
-	int contpar1 = 0, contpar2 = 0;	
+	//ESCALERA + MANJAR-----------------------------------------------------------------------
+	for(int i = 0; i < 9; i++){
+		if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
+			if(valor1 == valores[i] || valor2 == valores[i] || valor3 == valores[i] || valor4 == valores[i] || valor5 == valores[i]){
+				if(valor1 == valores[i+1] || valor2 == valores[i+1] || valor3 == valores[i+1] || valor4 == valores[i+1] || valor5 == valores[i+1]){
+					if(valor1 == valores[i+2] || valor2 == valores[i+2] || valor3 == valores[i+2] || valor4 == valores[i+2] || valor5 == valores[i+2]){
+						if(valor1 == valores[i+3] || valor2 == valores[i+3] || valor3 == valores[i+3] || valor4 == valores[i+3] || valor5 == valores[i+3]){
+							if(valor1 == valores[i+4] || valor2 == valores[i+4] || valor3 == valores[i+4] || valor4 == valores[i+4] || valor5 == valores[i+4]){
+								return(dinero*50);
+							}
+						}
+					}
+				}	
+			}
+		}		
+	}
+	//CUATRO IGUALES	
+	for(int i = 0; i < 13; i++){
+		contpar1 = 0;
+		if(valor1 == valores[i])
+			contpar1++;
+		if(valor2 == valores[i])
+			contpar1++;
+		if(valor3 == valores[i])
+			contpar1++;
+		if(valor4 == valores[i])
+			contpar1++;
+		if(valor5 == valores[i])
+			contpar1++;
+		if(contpar1 == 4)
+			return (dinero*25);
+	}
+	//FULL HOUSE
 	for(int i = 0; i < 13; i++){
 		if(contpar1 == 0){
 			if(valor1 == valores[i])
@@ -143,20 +163,14 @@ int juego(Carta* deck, int* mantener, int dinero){
 				contpar2++;
 			if(valor5 == valores[i])
 				contpar2++;
-			if(contpar1 == 4 || contpar2 == 4){
-				dinero *= 25;
-				break;			
-			}else if((contpar1 == 3 && contpar2 == 2) || (contpar2 == 3 && contpar1 == 2)){
-				dinero *= 9;//full house
-				break;			
-			}else if(contpar2 == 3 || contpar1 == 3){
-				dinero *= 3;//trio
-				break;
-			}else if(contpar1 == 2 && contpar2 == 2){
-				dinero *= 2;//dos pares
-				break;
+			if((contpar1 == 3 && contpar2 == 2) || (contpar2 == 3 && contpar1 == 2)){
+				return (dinero*9);		
 			}
 		}
+	}
+	//MISMO MANJAR------------------------------------------------------------------------------
+	if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
+		return(dinero*5);
 	}
 	//escalera--------------------------------------------------------------------------------
 	for(int i = 0; i < 10; i++){
@@ -165,43 +179,79 @@ int juego(Carta* deck, int* mantener, int dinero){
 				if(valor1 == valores[i+2] || valor2 == valores[i+2] || valor3 == valores[i+2] || valor4 == valores[i+2] || valor5 == valores[i+2]){
 					if(valor1 == valores[i+3] || valor2 == valores[i+3] || valor3 == valores[i+3] || valor4 == valores[i+3] || valor5 == valores[i+3]){
 						if(valor1 == valores[i+4] || valor2 == valores[i+4] || valor3 == valores[i+4] || valor4 == valores[i+4] || valor5 == valores[i+4]){
-							dinero *= 4;
-							break;
+							return(dinero*4);
 						}
 					}
 				}
 			}
 		}
-	}	
-	
-	//MISMO MANJAR------------------------------------------------------------------------------
-	if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
-		dinero *= 5;
 	}
-	//ESCALERA + MANJAR-----------------------------------------------------------------------
-	for(int i = 0; i < 9; i++){
-		if(palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5){
-			if(valor1 == valores[i] || valor2 == valores[i] || valor3 == valores[i] || valor4 == valores[i] || valor5 == valores[i]){
-				if(valor1 == valores[i+1] || valor2 == valores[i+1] || valor3 == valores[i+1] || valor4 == valores[i+1] || valor5 == valores[i+1]){
-					if(valor1 == valores[i+2] || valor2 == valores[i+2] || valor3 == valores[i+2] || valor4 == valores[i+2] || valor5 == valores[i+2]){
-						if(valor1 == valores[i+3] || valor2 == valores[i+3] || valor3 == valores[i+3] || valor4 == valores[i+3] || valor5 == valores[i+3]){
-							if(valor1 == valores[i+4] || valor2 == valores[i+4] || valor3 == valores[i+4] || valor4 == valores[i+4] || valor5 == valores[i+4]){
-								dinero *= 50;
-								break;
-							}
-						}
-					}
-				}	
+	//TRIO
+	for(int i = 0; i < 13; i++){
+		contpar1 = 0;
+		if(valor1 == valores[i])
+			contpar1++;
+		if(valor2 == valores[i])
+			contpar1++;
+		if(valor3 == valores[i])
+			contpar1++;
+		if(valor4 == valores[i])
+			contpar1++;
+		if(valor5 == valores[i])
+			contpar1++;
+		if(contpar1 == 3)
+			return (dinero*3);
+	}
+	//DOS PARES,TRIO
+	for(int i = 0; i < 13; i++){
+		if(contpar1 == 0){
+			if(valor1 == valores[i])
+				contpar1++;
+			if(valor2 == valores[i])
+				contpar1++;
+			if(valor3 == valores[i])
+				contpar1++;
+			if(valor4 == valores[i])
+				contpar1++;
+			if(valor5 == valores[i])
+				contpar1++;
+			if(contpar1 < 2)
+				contpar1 = 0;
+		}else if(contpar1 >= 2){
+			contpar2 = 0;
+			if(valor1 == valores[i])
+				contpar2++;
+			if(valor2 == valores[i])
+				contpar2++;
+			if(valor3 == valores[i])
+				contpar2++;
+			if(valor4 == valores[i])
+				contpar2++;
+			if(valor5 == valores[i])
+				contpar2++;
+			if(contpar1 == 2 && contpar2 == 2){
+				return (dinero*2);
 			}
-		}		
-	}
-	//escalera real
-	if((palo1 == palo2 && palo2 == palo3 && palo3 == palo4 && palo4 == palo5) && (color1 == color2 && color2 == color3 && color3 == color4 && color4 == color5)){
-		if((valor1 == "A" || valor2 == "A" || valor3 == "A" || valor4 == "A" || valor5 == "A") && (valor1 == "10" || valor2 == "10" || valor3 == "10" || valor4 == "10" || valor5 == "10") && (valor1 == "J" || valor2 == "J" || valor3 == "J" || valor4 == "J" || valor5 == "J") && (valor1 == "Q" || valor2 == "Q" || valor3 == "Q" || valor4 == "Q" || valor5 == "Q") && (valor1 == "K" || valor2 == "K" || valor3 == "K" || valor4 == "K" || valor5 == "K")){
-			dinero *= 250;
 		}
 	}
-	return dinero;
+	//PAR JACKS--------------------------------------------------------------------------------
+	for(int i = 10; i < 13; i++){
+		contpar1 = 0;
+		if(valor1 == valores[i])
+			contpar1++;
+		if(valor2 == valores[i])
+			contpar1++;
+		if(valor3 == valores[i])
+			contpar1++;
+		if(valor4 == valores[i])
+			contpar1++;
+		if(valor5 == valores[i])
+			contpar1++;
+		if(contpar1 == 2){
+			return dinero;
+		}
+	}
+	return 0;
 }
 void imprimircombos(){
 	addstr("Par Jack o mejor *1\nDos Pares *2\nTrio *3\nEscalera *4\nMismo Manjar *5\nFull House *9\nCuatro Iguales *25\nEscalera + Manjar *50\nEscalera Real *250\n");
@@ -336,9 +386,9 @@ void imprimircartas(Carta* deck, int*& mantener, bool primeravez){
 				color5 = deck[random].getColor();
 			}while(random == mantener[0] || random == mantener[2] || random == mantener[3] || random == mantener[1]);
 		}else{
-			carta5 = deck[mantener[5]].getValor();
-			palo5 = deck[mantener[5]].getFigura();
-			color5 = deck[mantener[5]].getColor();
+			carta5 = deck[mantener[4]].getValor();
+			palo5 = deck[mantener[4]].getFigura();
+			color5 = deck[mantener[4]].getColor();
 		}
 	}	
 	init_pair(1,COLOR_RED,COLOR_WHITE);
