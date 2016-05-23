@@ -14,75 +14,257 @@ void imprimircartas(Carta*,int*&,bool);
 void imprimircombos();
 int juego(Carta*,int*,int);
 void imprimircartasvacias();
+void guardarArchivo(int dinero);
+void abrirArchivo(int& dinero);
 
 int main(int argc, char*argv[]){
 	initscr();
 	start_color();
-	int dinero = 0,apuesta = 0;
+	int dinero = 0,apuesta = 0,opcion;
+	bool seguir = true;
 	char retener;
-	addstr("Ingrese cuanto dinero quiere tener: ");
-	refresh();
-	scanw("%d",&dinero);
-	if(dinero <= 0){
-		addstr("No puede empezar con una cuenta negativa o vacia\nSe le han acreditado $100 a su cuenta\n");
-		dinero = 100;
-	}
 	Carta* deck = crearmazo();
 	int* mantener = new int[5];
-	for(int i = 0; i < 5; i++)
-		mantener[i] = -1;
-	imprimircombos();
-	imprimircartasvacias();
-	do{
-		if(apuesta <= 0 || apuesta > dinero){
-			addstr("Como recordatorio:\nTiene que apostar dinero y no puede apostar mas de lo que tiene\n");
-		}
-		addstr("Cuanto dinero desea apostar? ");
+	addstr("1) Nueva partida\n2) Cargar Partida\n3) Salir\n");
+	scanw("%d\n",&opcion);
+	if(opcion == 1){
+		addstr("Ingrese cuanto dinero quiere tener: ");
 		refresh();
-		scanw("%d",&apuesta);
-	}while(apuesta > dinero || apuesta <= 0);
-	dinero -= apuesta;
-	clear();
-	imprimircartas(deck,mantener,true);
-	addstr("Porfavor conteste las siguientes preguntas con s y n\ns = si, n = no\nEmpezando desde la izquierda\n");
-	addstr("Quiere mantener la carta 1: ");
-	retener = getch();
-	addstr("\n");
-	if(retener == 'n' || retener == 'N')
-		mantener[0] = -1;
-	addstr("Quiere mantener la carta 2: ");
-	retener = getch();
-	addstr("\n");
-	if(retener == 'n' || retener == 'N')
-		mantener[1] = -1;
-	addstr("Quiere mantener la carta 3: ");
-	retener = getch();
-	addstr("\n");
-	if(retener == 'n' || retener == 'N')
-		mantener[2] = -1;
-	addstr("Quiere mantener la carta 4: ");
-	retener = getch();
-	addstr("\n");
-	if(retener == 'n' || retener == 'N')
-		mantener[3] = -1;
-	addstr("Quiere mantener la carta 5: ");
-	retener = getch();
-	addstr("\n");
-	if(retener == 'n' || retener == 'N')
-		mantener[4] = -1;
-	clear();
-	imprimircartas(deck,mantener,false);
-	addstr("Ganancias: ");
-	refresh();
-	printw("%d\n",juego(deck,mantener,apuesta));
-	dinero += juego(deck,mantener,dinero);
-	refresh();
-	getch();
-	clear();
+		scanw("%d",&dinero);
+		if(dinero <= 0){
+			addstr("No puede empezar con una cuenta negativa o vacia\nSe le han acreditado $100 a su cuenta\n");
+			dinero = 100;
+		}
+		while(seguir){
+			if(dinero == 0){
+				addstr("Se ha quedado sin dinero, desea adicionar dinero a su cuenta?");
+				scanw("%d\n",&dinero);
+				if(dinero == 0){
+					addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+					dinero = 100;	
+				}
+			}
+			printw("Usted tiene %d de dinero disponible\n",dinero);
+			for(int i = 0; i < 5; i++)
+				mantener[i] = -1;
+			imprimircombos();
+			imprimircartasvacias();
+			do{
+				if(apuesta <= 0 || apuesta > dinero){
+					addstr("Como recordatorio:\nTiene que apostar dinero y no puede apostar mas de lo que tiene\n");
+				}
+				addstr("Cuanto dinero desea apostar? ");
+				refresh();
+				scanw("%d",&apuesta);
+			}while(apuesta > dinero || apuesta <= 0);
+			dinero -= apuesta;
+			clear();
+			imprimircartas(deck,mantener,true);
+			addstr("Porfavor conteste las siguientes preguntas con s y n\ns = si, n = no\nEmpezando desde la izquierda\nCualquier otra respuesta sera tomada como un si\n");
+			addstr("Quiere mantener la carta 1: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[0] = -1;
+			addstr("Quiere mantener la carta 2: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[1] = -1;
+			addstr("Quiere mantener la carta 3: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[2] = -1;
+			addstr("Quiere mantener la carta 4: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[3] = -1;
+			addstr("Quiere mantener la carta 5: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[4] = -1;
+			clear();
+			imprimircartas(deck,mantener,false);
+			addstr("Ganancias: ");
+			refresh();
+			printw("%d\n",juego(deck,mantener,apuesta));
+			dinero += juego(deck,mantener,apuesta);
+			refresh();
+			getch();
+			clear();
+			addstr("1)guardar partida y salir\n2)guardar partida y seguir\n3)salir sin guardar\n4)seguir jugando\nOpcion: ");
+			scanw("%d\n",&opcion);
+			if(opcion == 1){
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				guardarArchivo(dinero);
+				seguir = false;
+			}else if(opcion == 2){
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				guardarArchivo(dinero);
+				clear();
+			}else if(opcion == 3){
+				seguir = false;
+			}else{
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				clear();
+			}		
+		}
+	}else if(opcion == 2){
+		abrirArchivo(dinero);
+		while(seguir){
+			if(dinero == 0){
+				addstr("Se ha quedado sin dinero, desea adicionar dinero a su cuenta?");
+				scanw("%d\n",&dinero);
+				if(dinero == 0){
+					addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+					refresh();
+					getch();
+					dinero = 100;	
+				}
+			}
+			printw("Usted tiene %d de dinero disponible\n",dinero);
+			for(int i = 0; i < 5; i++)
+				mantener[i] = -1;
+			imprimircombos();
+			imprimircartasvacias();
+			do{
+				if(apuesta <= 0 || apuesta > dinero){
+					addstr("Como recordatorio:\nTiene que apostar dinero y no puede apostar mas de lo que tiene\n");
+				}
+				addstr("Cuanto dinero desea apostar? ");
+				refresh();
+				scanw("%d",&apuesta);
+			}while(apuesta > dinero || apuesta <= 0);
+			dinero -= apuesta;
+			clear();
+			imprimircartas(deck,mantener,true);
+			addstr("Porfavor conteste las siguientes preguntas con s y n\ns = si, n = no\nEmpezando desde la izquierda\nCualquier otra respuesta sera tomada como un si\n");
+			addstr("Quiere mantener la carta 1: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[0] = -1;
+			addstr("Quiere mantener la carta 2: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[1] = -1;
+			addstr("Quiere mantener la carta 3: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[2] = -1;
+			addstr("Quiere mantener la carta 4: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[3] = -1;
+			addstr("Quiere mantener la carta 5: ");
+			retener = getch();
+			addstr("\n");
+			if(retener == 'n' || retener == 'N')
+				mantener[4] = -1;
+			clear();
+			imprimircartas(deck,mantener,false);
+			addstr("Ganancias: ");
+			refresh();
+			printw("%d\n",juego(deck,mantener,apuesta));
+			dinero += juego(deck,mantener,apuesta);
+			refresh();
+			getch();
+			clear();
+			addstr("1)guardar partida y salir\n2)guardar partida y seguir\n3)salir sin guardar\n4)seguir jugando\nOpcion: ");
+			scanw("%d\n",&opcion);
+			if(opcion == 1){
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				guardarArchivo(dinero);
+				seguir = false;
+			}else if(opcion == 2){
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				guardarArchivo(dinero);
+				clear();
+			}else if(opcion == 3){
+				seguir = false;
+			}else{
+				if(dinero == 0){
+					addstr("Se ha quedado sin dinero, cuanto dinero desea adicionar a su cuenta? ");
+					scanw("%d\n",&dinero);
+					if(dinero == 0){
+						addstr("A nosotros nos importa mucho su diversion por esta razon se le han regalado $100");
+						refresh();
+						getch();
+						dinero = 100;	
+					}
+				}
+				clear();
+			}		
+		}
+	}
 	delete[] deck;
 	delete[] mantener;
 	endwin();
 	return 0;
+}
+
+void guardarArchivo(int dinero){
+	FILE *guardarpartida;
+	guardarpartida = fopen("Partida.bin","w");
+	fwrite(&dinero,sizeof(int),1,guardarpartida);
+	fclose(guardarpartida);
+}
+void abrirArchivo(int& dinero){
+	FILE  *leerpartida;
+	leerpartida = fopen("Partida.bin","r");
+	fread(&dinero,sizeof(int),1,leerpartida);
+	fclose(leerpartida);
 }
 void imprimircartasvacias(){
 	addstr("***************  ***************  ***************  *************** ***************\n");
@@ -235,7 +417,7 @@ int juego(Carta* deck, int* mantener, int dinero){
 		}
 	}
 	//PAR JACKS--------------------------------------------------------------------------------
-	for(int i = 10; i < 13; i++){
+	for(int i = 0; i < 13; i++){
 		contpar1 = 0;
 		if(valor1 == valores[i])
 			contpar1++;
@@ -249,6 +431,9 @@ int juego(Carta* deck, int* mantener, int dinero){
 			contpar1++;
 		if(contpar1 == 2){
 			return dinero;
+		}
+		if(i == 0){
+			i += 10;
 		}
 	}
 	return 0;
