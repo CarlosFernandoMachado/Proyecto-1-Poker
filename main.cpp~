@@ -122,7 +122,7 @@ int main(int argc, char*argv[]){
 					cartapersona = mantener[cartapersona];
 					cartamaquina = mantener[cartamaquina];
 					clear();
-					addstr("1) Carta persona \t 2) Carta Maquina\n");
+					addstr("1) Carta persona    2) Carta Maquina\n");
 					imprimirdoscartas(deck,cartapersona,cartamaquina);
 					ganancias = dobleonada(deck,ganancias,cartapersona,cartamaquina);
 					addstr("Ganancias total: ");
@@ -264,7 +264,7 @@ int main(int argc, char*argv[]){
 					cartapersona = mantener[cartapersona];
 					cartamaquina = mantener[cartamaquina];
 					clear();
-					addstr("1) Carta persona \t 2) Carta Maquina\n");
+					addstr("1) Carta persona    2) Carta Maquina\n");
 					imprimirdoscartas(deck,cartapersona,cartamaquina);
 					ganancias = dobleonada(deck,ganancias,cartapersona,cartamaquina);
 					addstr("Ganancias total: ");

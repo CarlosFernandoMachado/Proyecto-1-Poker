@@ -778,7 +778,7 @@ int juego(Carta* deck, int* mantener, int dinero){
 			return dinero;
 		}
 		if(i == 0){
-			i += 10;
+			i += 9;
 		}
 	}
 	return 0;
